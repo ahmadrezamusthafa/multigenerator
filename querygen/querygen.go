@@ -170,7 +170,7 @@ func assignCollectionValueByAttributeType(attrType valuetype.ValueType, attrValu
 		attrs := strings.Split(attrValue, ",")
 		var strData []string
 		for _, attr := range attrs {
-			strData = append(strData, "'"+strings.Trim(attr, "'")+"'")
+			strData = append(strData, "'"+strings.ReplaceAll(attr, "'", "''")+"'")
 		}
 		attrValue = strings.Trim(strings.Join(strData, ","), "[]")
 	}
@@ -179,7 +179,7 @@ func assignCollectionValueByAttributeType(attrType valuetype.ValueType, attrValu
 
 func assignValueByAttributeType(attrType valuetype.ValueType, attrValue string) string {
 	if attrType != valuetype.Numeric {
-		attrValue = "'" + strings.Trim(attrValue, "'") + "'"
+		attrValue = "'" + strings.ReplaceAll(attrValue, "'", "''") + "'"
 	}
 	return attrValue
 }

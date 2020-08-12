@@ -142,7 +142,7 @@ func Test_generateWhereParameter(t *testing.T) {
 			want: `
                 WHERE 
                   id IN (1,2,3,4,5) 
-                  AND initial IN ('ABC','DEF','KLM')
+                  AND initial IN ('''ABC','DEF','KLM')
 `,
 			wantErr: false,
 		},

@@ -19,4 +19,5 @@ const (
 	OperatorExclude          = "NOT IN"
 	OperatorIsNull           = "IS NULL"
 	OperatorIsNotNull        = "IS NOT NULL"
+	OperatorLike             = "LIKE"
 )

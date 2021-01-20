@@ -121,6 +121,40 @@ func Test_generateWhereParameter(t *testing.T) {
 							{
 								Attribute: &types.Attribute{
 									Name:     "id",
+									Operator: "LIKE",
+									Value:    "1,2,3,4,5%",
+									Type:     valuetype.Alphanumeric,
+								},
+							},
+							{
+								Operator: "AND",
+								Attribute: &types.Attribute{
+									Name:     "initial",
+									Operator: "LIKE",
+									Value:    "%ABC,DEF,KLM",
+									Type:     valuetype.Alphanumeric,
+								},
+							},
+						},
+					},
+				},
+			},
+			want: `
+                WHERE 
+                  id LIKE '1,2,3,4,5%' 
+                  AND initial LIKE '%ABC,DEF,KLM'
+`,
+			wantErr: false,
+		},
+		{
+			name: "Normal case",
+			args: args{
+				condition: []*types.Condition{
+					{
+						Conditions: []*types.Condition{
+							{
+								Attribute: &types.Attribute{
+									Name:     "id",
 									Operator: "IN",
 									Value:    "1,2,3,4,5",
 									Type:     valuetype.Numeric,

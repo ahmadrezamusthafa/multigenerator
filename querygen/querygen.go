@@ -25,6 +25,7 @@ var (
 		consts.OperatorExclude:          nil,
 		consts.OperatorIsNull:           nil,
 		consts.OperatorIsNotNull:        nil,
+		consts.OperatorLike:             nil,
 	}
 
 	logicalOperatorMap = map[string]interface{}{

@@ -36,7 +36,7 @@ var (
 
 func (g *QueryGen) GenerateQuery(mainQuery string, baseCondition types.BaseCondition) (string, error) {
 	queries := strings.Split(strings.ToLower(mainQuery), " from ")
-	if len(queries) > 1 {
+	if len(queries) > 1 && baseCondition.Fields != nil && len(baseCondition.Fields) > 0 {
 		mainQuery = "SELECT " + strings.Trim(strings.Join(baseCondition.Fields, ", "), "[]") + " FROM " + queries[1]
 	}
 	return generateQueryParameter(mainQuery, baseCondition)

@@ -3,7 +3,9 @@ package structgen
 import (
 	"bytes"
 	"github.com/ahmadrezamusthafa/multigenerator/shared/consts"
+	"github.com/ahmadrezamusthafa/multigenerator/shared/enums/valuetype"
 	"github.com/ahmadrezamusthafa/multigenerator/shared/types"
+	"time"
 )
 
 type StructGen struct {
@@ -78,6 +80,7 @@ func buildCondition(condition types.Condition, attrs []*types.TokenAttribute) (i
 				}
 			} else {
 				conditionItem.Attribute.Value = attr.Value
+				conditionItem.Attribute.Type = getValueType(attr.Value)
 				if condition.Conditions == nil {
 					condition.Conditions = []*types.Condition{}
 				}
@@ -154,4 +157,37 @@ func appendAttribute(tokenAttributes []*types.TokenAttribute, buffer *bytes.Buff
 	})
 	buffer.Reset()
 	return tokenAttributes
+}
+
+func getValueType(value string) valuetype.ValueType {
+	varType, indexVal, dotCount := valuetype.Alphanumeric, 0, 0
+	for _, char := range value {
+		if char == ',' {
+			continue
+		}
+		if '0' <= char && char <= '9' {
+			if indexVal == 0 || (indexVal > 0 && dotCount == 1) {
+				varType = valuetype.Numeric
+			}
+		} else if char == '.' {
+			if indexVal > 0 && varType == valuetype.Numeric {
+				dotCount++
+				varType = valuetype.Alphanumeric
+			}
+			if dotCount > 1 {
+				varType = valuetype.Alphanumeric
+				break
+			}
+		} else {
+			varType = valuetype.Alphanumeric
+			break
+		}
+		indexVal++
+	}
+	if varType == valuetype.Alphanumeric {
+		if _, err := time.Parse(consts.DateTimeFormat, value); err == nil {
+			varType = valuetype.Date
+		}
+	}
+	return varType
 }

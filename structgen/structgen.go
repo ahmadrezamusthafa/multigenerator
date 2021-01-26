@@ -80,7 +80,9 @@ func buildCondition(condition types.Condition, attrs []*types.TokenAttribute) (i
 				}
 			} else {
 				conditionItem.Attribute.Value = attr.Value
-				conditionItem.Attribute.Type = getValueType(attr.Value)
+				if !attr.IsAlphanumeric {
+					conditionItem.Attribute.Type = getValueType(attr.Value)
+				}
 				if condition.Conditions == nil {
 					condition.Conditions = []*types.Condition{}
 				}
@@ -96,6 +98,7 @@ func getTokenAttributes(query string) []*types.TokenAttribute {
 	var tokenAttributes []*types.TokenAttribute
 	buffer := &bytes.Buffer{}
 	isOpenQuote := false
+	isAlphanumeric := false
 	for _, char := range query {
 		switch char {
 		case ' ', '\n', '\'':
@@ -109,11 +112,14 @@ func getTokenAttributes(query string) []*types.TokenAttribute {
 				bufBytes := buffer.Bytes()
 				switch bufBytes[0] {
 				case consts.ByteVerticalBar:
-					tokenAttributes = appendAttribute(tokenAttributes, buffer, consts.LogicalOperatorOrSyntax)
+					tokenAttributes = appendAttribute(tokenAttributes, buffer, consts.LogicalOperatorOrSyntax, isAlphanumeric)
+					isAlphanumeric = false
 				case consts.ByteAmpersand:
-					tokenAttributes = appendAttribute(tokenAttributes, buffer, consts.LogicalOperatorAndSyntax)
+					tokenAttributes = appendAttribute(tokenAttributes, buffer, consts.LogicalOperatorAndSyntax, isAlphanumeric)
+					isAlphanumeric = false
 				default:
-					tokenAttributes = appendAttribute(tokenAttributes, buffer, string(bufBytes))
+					tokenAttributes = appendAttribute(tokenAttributes, buffer, string(bufBytes), isAlphanumeric)
+					isAlphanumeric = false
 					buffer.WriteRune(char)
 				}
 			} else {
@@ -124,10 +130,12 @@ func getTokenAttributes(query string) []*types.TokenAttribute {
 				bufBytes := buffer.Bytes()
 				switch bufBytes[0] {
 				case consts.ByteLessThan, consts.ByteGreaterThan:
-					tokenAttributes = appendAttribute(tokenAttributes, buffer, string(bufBytes)+string(char))
+					tokenAttributes = appendAttribute(tokenAttributes, buffer, string(bufBytes)+string(char), isAlphanumeric)
+					isAlphanumeric = false
 					continue
 				default:
-					tokenAttributes = appendAttribute(tokenAttributes, buffer, string(bufBytes))
+					tokenAttributes = appendAttribute(tokenAttributes, buffer, string(bufBytes), isAlphanumeric)
+					isAlphanumeric = false
 				}
 			}
 			tokenAttributes = append(tokenAttributes, &types.TokenAttribute{
@@ -135,25 +143,31 @@ func getTokenAttributes(query string) []*types.TokenAttribute {
 			})
 		case '"':
 			isOpenQuote = !isOpenQuote
+			if !isOpenQuote {
+				isAlphanumeric = true
+			}
 		default:
 			if buffer.Len() > 0 {
 				bufByte := buffer.Bytes()[0]
 				if bufByte == consts.ByteLessThan || bufByte == consts.ByteGreaterThan {
-					tokenAttributes = appendAttribute(tokenAttributes, buffer, string(bufByte))
+					tokenAttributes = appendAttribute(tokenAttributes, buffer, string(bufByte), isAlphanumeric)
+					isAlphanumeric = false
 				}
 			}
 			buffer.WriteRune(char)
 		}
 	}
 	if buffer.Len() > 0 {
-		tokenAttributes = appendAttribute(tokenAttributes, buffer, buffer.String())
+		tokenAttributes = appendAttribute(tokenAttributes, buffer, buffer.String(), isAlphanumeric)
+		isAlphanumeric = false
 	}
 	return tokenAttributes
 }
 
-func appendAttribute(tokenAttributes []*types.TokenAttribute, buffer *bytes.Buffer, value string) []*types.TokenAttribute {
+func appendAttribute(tokenAttributes []*types.TokenAttribute, buffer *bytes.Buffer, value string, isAlphanumeric bool) []*types.TokenAttribute {
 	tokenAttributes = append(tokenAttributes, &types.TokenAttribute{
-		Value: value,
+		Value:          value,
+		IsAlphanumeric: isAlphanumeric,
 	})
 	buffer.Reset()
 	return tokenAttributes

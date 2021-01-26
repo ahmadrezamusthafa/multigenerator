@@ -10,6 +10,7 @@ type Attribute struct {
 }
 
 type TokenAttribute struct {
-	Value     string
-	HasCalled bool
+	Value          string
+	IsAlphanumeric bool
+	HasCalled      bool
 }

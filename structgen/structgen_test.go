@@ -337,7 +337,8 @@ func Test_getToken(t *testing.T) {
 					Value: ">",
 				},
 				{
-					Value: "2019-09-01 00:10:00",
+					Value:          "2019-09-01 00:10:00",
+					IsAlphanumeric: true,
 				},
 				{
 					Value: "&&",
@@ -364,7 +365,8 @@ func Test_getToken(t *testing.T) {
 					Value: "=",
 				},
 				{
-					Value: "12",
+					Value:          "12",
+					IsAlphanumeric: true,
 				},
 				{
 					Value: "||",

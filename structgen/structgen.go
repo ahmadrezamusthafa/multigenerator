@@ -80,9 +80,10 @@ func buildCondition(condition types.Condition, attrs []*types.TokenAttribute) (i
 				}
 			} else {
 				conditionItem.Attribute.Value = attr.Value
-				if !attr.IsAlphanumeric {
+				//todo : enable this later
+				/*if !attr.IsAlphanumeric {
 					conditionItem.Attribute.Type = getValueType(attr.Value)
-				}
+				}*/
 				if condition.Conditions == nil {
 					condition.Conditions = []*types.Condition{}
 				}
